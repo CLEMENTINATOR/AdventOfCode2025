@@ -37,7 +37,39 @@ pub fn part1(input: &str) -> Num {
 }
 
 pub fn part2(input: &str) -> Num {
-    0
+    let mut dial_position: u32 = 50;
+    input
+        .lines()
+        .map(|l| {
+            let (dir, count) = l.split_at(1);
+            let count: u32 = count.parse().unwrap();
+            match dir {
+                "L" => Direction::Left(count),
+                "R" => Direction::Right(count),
+                _ => panic!("invalid dir {dir}"),
+            }
+        })
+        .map(|dir| {
+            let (res, passed_zero_count) = match dir {
+                Direction::Left(count) => {
+                    let steps = count % 100;
+                    if let Some(dial_position) = dial_position.checked_sub(steps) {
+                        let passed_zero = if dial_position == 0 { 1 } else { 0 };
+                        (dial_position, count / 100 + passed_zero)
+                    } else {
+                        let passed_zero = if dial_position == 0 { 0 } else { 1 };
+                        (100 - (steps - dial_position), count / 100 + passed_zero)
+                    }
+                }
+
+                Direction::Right(count) => {
+                    ((dial_position + count) % 100, (dial_position + count) / 100)
+                }
+            };
+            dial_position = res;
+            passed_zero_count
+        })
+        .sum()
 }
 
 #[cfg(test)]
@@ -60,7 +92,7 @@ L82
     #[test]
     fn example() {
         assert_eq!(part1(EXAMPLE), 3);
-        assert_eq!(part2(EXAMPLE), 0);
+        assert_eq!(part2(EXAMPLE), 6);
     }
 
     #[test]
@@ -71,11 +103,11 @@ L82
         assert_eq!(output, 1040);
     }
 
-    //#[test]
-    //fn run_part2() {
-    //    let input = crate::utils::get_day_input!();
-    //    let output = part2(&input);
-    //    println!("Part 2: {}", output);
-    //    assert_eq!(output, 0);
-    //}
+    #[test]
+    fn run_part2() {
+        let input = crate::utils::get_day_input!();
+        let output = part2(&input);
+        println!("Part 2: {}", output);
+        assert_eq!(output, 6027);
+    }
 }
