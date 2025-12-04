@@ -30,3 +30,7 @@ devenv.local.yaml
 
 # pre-commit
 .pre-commit-config.yaml
+
+# AoC files
+inputs/
+puzzles/
