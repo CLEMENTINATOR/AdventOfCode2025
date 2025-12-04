@@ -29,7 +29,44 @@ pub fn part1(input: &str) -> Num {
 }
 
 pub fn part2(input: &str) -> Num {
-    0
+    let init = 0;
+    input
+        .trim_end()
+        .split(",")
+        .fold(init, |acc, product_range| {
+            let idx = product_range.find("-").unwrap();
+            let start: u64 = product_range[0..idx].parse().unwrap();
+            let end: u64 = product_range[(idx + 1)..].parse().unwrap();
+
+            let mut acc = acc;
+            for i in start..(end + 1) {
+                let i_str = i.to_string();
+                let len = i_str.len();
+                for j in 1..((len / 2) + 1) {
+                    if len % j != 0 {
+                        // if 123123123, if we have 4, we cannot split it into pieces of 4 chars
+                        continue;
+                    }
+                    let needle = &i_str[0..j];
+                    let reminder = &i_str[j..];
+
+                    let mut matches = true;
+
+                    for k in 0..(reminder.len() / needle.len()) {
+                        if needle != &reminder[(k * needle.len())..((k + 1) * needle.len())] {
+                            matches = false;
+                            break;
+                        }
+                    }
+
+                    if matches {
+                        acc += i;
+                        break;
+                    }
+                }
+            }
+            acc
+        })
 }
 
 #[cfg(test)]
@@ -41,7 +78,7 @@ mod tests {
     #[test]
     fn example() {
         assert_eq!(part1(EXAMPLE), 1227775554);
-        assert_eq!(part2(EXAMPLE), 0);
+        assert_eq!(part2(EXAMPLE), 4174379265);
     }
 
     #[test]
@@ -52,11 +89,11 @@ mod tests {
         assert_eq!(output, 23560874270);
     }
 
-    //#[test]
-    //fn run_part2() {
-    //    let input = crate::utils::get_day_input!();
-    //    let output = part2(&input);
-    //    println!("Part 2: {}", output);
-    //    assert_eq!(output, 0);
-    //}
+    #[test]
+    fn run_part2() {
+        let input = crate::utils::get_day_input!();
+        let output = part2(&input);
+        println!("Part 2: {}", output);
+        assert_eq!(output, 44143124633);
+    }
 }
